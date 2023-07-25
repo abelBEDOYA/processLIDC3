@@ -264,29 +264,25 @@ def train(model, n_epochs:int =4,
             # Obtenemos los tensores:
             imgs, mask = patient.get_tensors(scaled=True)
             t3 = time.time()
-            if torch.cuda.is_available():
-                device = torch.device('cuda')
-                imgs, mask = imgs.to(device), mask.to(device)
-            t4 = time.time()
-            # Preparamos tensores para recorrerlos:
-            # primera = 2
-            # ultima = 10
-            # dataset = TensorDataset(imgs[primera:ultima], mask[primera:ultima])
             dataset = TensorDataset(imgs, mask)
 
             train_loader = DataLoader(dataset,batch_size=batch_size, shuffle=True)
             loss_batch = np.array([])
-            t5 = time.time()
+            t4 = time.time()
             if verbose:
                 print('Conseguir paciente: ',t2-t1, 's')
                 print('Conseguir tesores de paciente: ',t3 -t2 , 's')
-                print('Mover datos a la grafica: ',t4 -t3 , 's')
-                print('Preparar data loader: ',t5-t4, 's')
+                print('Preparar data loader: ',t4-t3, 's')
             for batch_idx, (data, target) in enumerate(train_loader):
                 t6 = time.time()
-                if torch.all(target == 0):
+                if torch.all(target[:,0,:,:] == 0):
                     # print('\t es 0')
                     continue
+                t6_ = time.time()
+                if torch.cuda.is_available():
+                    device = torch.device('cuda')
+                    data, target = data.to(device), target.to(device)
+
                 t7 = time.time()
                 # print(torch.mean(target))
                 # # Forward pass
@@ -305,9 +301,12 @@ def train(model, n_epochs:int =4,
                 batch_loss_history = np.append(batch_loss_history, loss.item())
                 if verbose:
                     print('Comprobar ceros en batch: ',t7-t6, 's')
+                    print('Mover batch a la grafica: ', t6_-t6)
                     print('Predict: ',t8-t7, 's')
                     print('Loss calculation: ',t9-t8, 's')
                     print('Back propagation: ',t10-t9, 's')
+                    print('el batch tarda: ', t10-t6)
+                    print('-----------')
 
 
 
