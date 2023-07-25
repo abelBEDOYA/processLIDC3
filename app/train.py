@@ -208,7 +208,7 @@ def train(model, n_epochs:int =4,
           model_extension = '.pt',
           failed_patients: list = [],
           loss_type: int = 1,
-          verbose: bool = Falses):
+          verbose: bool = False):
     """Ejecuta el entrenamiento
 
     Args:
