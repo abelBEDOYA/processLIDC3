@@ -207,7 +207,8 @@ def train(model, n_epochs:int =4,
           save_epochs = None,
           model_extension = '.pt',
           failed_patients: list = [],
-          loss_type: int = 1):
+          loss_type: int = 1,
+          verbose: bool = Falses):
     """Ejecuta el entrenamiento
 
     Args:
@@ -254,18 +255,19 @@ def train(model, n_epochs:int =4,
                                                                                                            i,
                                                                                                            len_train_patients,
                                                                                                            id_pat))
+            t1 = time.time()
             # Cargamos datos de un paciente:
             patient = Patient(id_pat)
-
             # Escalamos:
             patient.scale()
-
+            t2 = time.time()
             # Obtenemos los tensores:
             imgs, mask = patient.get_tensors(scaled=True)
+            t3 = time.time()
             if torch.cuda.is_available():
                 device = torch.device('cuda')
                 imgs, mask = imgs.to(device), mask.to(device)
-
+            t4 = time.time()
             # Preparamos tensores para recorrerlos:
             # primera = 2
             # ultima = 10
@@ -274,22 +276,41 @@ def train(model, n_epochs:int =4,
 
             train_loader = DataLoader(dataset,batch_size=batch_size, shuffle=True)
             loss_batch = np.array([])
+            t5 = time.time()
+            if verbose:
+                print('Conseguir paciente: ',t2-t1, 's')
+                print('Conseguir tesores de paciente: ',t3 -t2 , 's')
+                print('Mover datos a la grafica: ',t4 -t3 , 's')
+                print('Preparar data loader: ',t5-t4, 's')
             for batch_idx, (data, target) in enumerate(train_loader):
+                t6 = time.time()
                 if torch.all(target == 0):
                     # print('\t es 0')
                     continue
+                t7 = time.time()
                 # print(torch.mean(target))
                 # # Forward pass
                 output = model(data)
+                t8 = time.time()
                 # Calcular pérdida
                 loss = loss_function(output, target, loss_type=loss_type)
+                t9 = time.time()
                 # print('\t loss', loss, 'torch.mean(target):', torch.mean(target))
                 # # # Calcular gradientes y actualizar parámetros
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
+                t10 = time.time()
                 loss_batch = np.append(loss_batch, loss.item())
                 batch_loss_history = np.append(batch_loss_history, loss.item())
+                if verbose:
+                    print('Comprobar ceros en batch: ',t7-t6, 's')
+                    print('Predict: ',t8-t7, 's')
+                    print('Loss calculation: ',t9-t8, 's')
+                    print('Back propagation: ',t10-t9, 's')
+
+
+
             del data
             del target
             del dataset
