@@ -79,7 +79,7 @@ def get_val_loss(model, val_patients, batch_size=4, loss_type = 1):
             # # Forward pass
             output = model(data)
             # Calcular pérdida
-            loss = loss_function(output[:,0], target, loss_type = loss_type)
+            loss = loss_function(output, target, loss_type = loss_type)
             # print('loss', loss, 'torch.mean(target):', torch.mean(target))
             
             loss_batch = np.append(loss_batch, loss.item())
