@@ -1,2 +1,2 @@
 # processLIDC3
-Libreria para inspeccionar apcientes del dataset LIDC-IDRI, entrenar una UNet y 
+Libreria para inspeccionar apcientes del dataset LIDC-IDRI, entrenar una UNet y hacer inferencia.
