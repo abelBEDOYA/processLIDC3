@@ -282,8 +282,6 @@ def train(model, n_epochs:int =4,
                 # # Forward pass
                 output = model(data)
                 # Calcular pérdida
-                print(output.shape)
-                print(target.shape)
                 loss = loss_function(output, target, loss_type=loss_type)
                 # print('\t loss', loss, 'torch.mean(target):', torch.mean(target))
                 # # # Calcular gradientes y actualizar parámetros

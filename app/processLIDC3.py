@@ -248,7 +248,7 @@ class Patient():
             images = t_vol
             masks = t_mask
             shape = images.shape
-            print(shape)
+            # print(shape)
             images = images.view(shape[0], 1, shape[1], shape[2])
             images = images.repeat((1, 3, 1, 1))
             return images, masks
