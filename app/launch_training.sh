@@ -1,0 +1,1 @@
+python3 train.py --n_epochs 1 --batch_size 2 --val_split 0.5 --path2dataset '../../manifest-1675801116903/LIDC-IDRI/' --path2savefiles '../trainings/training_local/' --plot_metrics --save_plots --save_epochs 1 --model_extension '.pt' --loss_type 4
