@@ -219,6 +219,7 @@ class Patient():
             print('realizando inferencia...')
             legend_labels_pred = ['Predicción']
             pred = self.predict(model, slices=slices, scaled=True, gpu=gpu)
+            print(pred.shape)
         legend_labels_label = ['Etiqueta']
         fig, axs = plt.subplots(1, num_images, figsize=(12, 4))
 
@@ -229,7 +230,8 @@ class Patient():
             axs[i].set_title(f'Imagen {slices[i]}')
             
             # Dibujar contorno
-            axs[i].contour(mask[i], colors='blue', levels=[0.5])  # Ajusta el nivel de contorno según tus necesidades
+            axs[i].contour(mask[i][0], colors='blue', levels=[0.5])  # Ajusta el nivel de contorno según tus necesidades
+            # print(pred[i][0].shape)
             if model is not None and np.any(pred[i,0]>threshold):
                 axs[i].contour(pred[i,0], colors='red', levels=[threshold])  # Ajusta el nivel de contorno según tus necesidades
         

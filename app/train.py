@@ -308,8 +308,6 @@ def train(model, n_epochs:int =4,
                     print('el batch tarda: ', t10-t6)
                     print('-----------')
 
-
-
             del data
             del target
             del dataset
