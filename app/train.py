@@ -15,6 +15,7 @@ from processLIDC3 import Patient
 import datetime
 import cv2
 from unet import UNet
+import csv
 random.seed(123)
 
 
@@ -219,6 +220,17 @@ def loss_function(output, target, loss_type = 1):
         print('Indica una loss function que sea 1, 2 o 3. Has indicado loss = {}'.format(loss_type))
 
 
+def save_patients_train_val_csv(train_list, val_list, folder_path):
+    nombre_archivo_csv = f"{folder_path}informacion.csv"
+
+    # Combinar las dos listas en una lista de tuplas (cada tupla representa una fila en el CSV)
+    filas = list(zip(train_list, val_list))
+
+    # Escribir la información en el archivo CSV
+    with open(nombre_archivo_csv, mode="w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(["train_list", "val_list"])  # Escribir encabezados de columna
+        writer.writerows(filas)
 
 def train(model, n_epochs:int =4, 
           batch_size: int = 4, 
@@ -247,7 +259,7 @@ def train(model, n_epochs:int =4,
     patients = [pat for pat in patients if not pat=='LICENSE' and pat not in failed_patients]
 
     train_patients, val_patients = train_val_split(patients, val_split)
-
+    save_patients_train_val_csv(train_patients, val_patients, path2savefiles)
     # Definir optimizador
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
