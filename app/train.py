@@ -169,17 +169,38 @@ def loss_function(output, target, loss_type = 1):
     elif loss_type == 2:
         print(output.shape, flush=True)
         print(target.shape, flush=True)
-        intersection = torch.sum(output * target)
-        union = torch.sum(output) + torch.sum(target) - intersection
+        
+        # Loss de mascara nodulos:
+        output_nodulo = output[:,0,:,:]
+        target_nodulo = target[:,0,:,:]
+
+
+        ## IoU
+        intersection = torch.sum(output_nodulo * target_nodulo)
+        union = torch.sum(output_nodulo) + torch.sum(target_nodulo) - intersection
         iou = intersection / (union + 1e-7)  # small constant to avoid division by zero
         if union == 0:
-            # print('Es 0!!!!')
             iou=1
         loss_iou = 1 - iou
-        weights = target*20+1
-        loss = F.binary_cross_entropy(output, target, reduction='none')
+        ## BCE
+        weights = target_nodulo*20+1
+        loss = F.binary_cross_entropy(output_nodulo, target_nodulo, reduction='none')
         weighted_loss = loss * weights
-        loss_total = 3*loss_iou + torch.sum(weighted_loss)
+        loss_total_0 = 3*loss_iou + torch.sum(weighted_loss)
+        
+        # Loss de mascara sana:
+        ## Solo BCE
+        output_sana = output[:,1,:,:]
+        target_sana = target[:,1,:,:]
+        weights = (-1*target_nodulo+1)*20+1
+        loss = F.binary_cross_entropy(output_sana, target_sana, reduction='none')
+        weighted_loss = loss * weights
+        loss_total_1 = 3*loss_iou + torch.sum(weighted_loss)
+        
+        
+        loss_total = loss_total_0 + loss_total_1
+        
+        
         return loss_total
     elif loss_type == 3:
         
@@ -278,7 +299,7 @@ def train(model, n_epochs:int =4,
             for batch_idx, (data, target) in enumerate(train_loader):
                 t6 = time.time()
                 if torch.all(target[:,0,:,:] == 0):
-                    if random.random() > 0.1:
+                    if random.random() > 0.05:
                         # print('\t es 0')
                         continue
                     else:
