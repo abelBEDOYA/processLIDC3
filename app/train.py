@@ -167,8 +167,8 @@ def loss_function(output, target, loss_type = 1):
         print(loss_, flush=True)
         return loss_
     elif loss_type == 2:
-        print(output.shape, flush=True)
-        print(target.shape, flush=True)
+        # print(output.shape, flush=True)
+        # print(target.shape, flush=True)
         
         # Loss de mascara nodulos:
         output_nodulo = output[:,0,:,:]
@@ -302,10 +302,10 @@ def train(model, n_epochs:int =4,
                     if random.random() > 0.05:
                         # print('\t es 0')
                         continue
-                    else:
-                        print('batch sin tumor pero lo cogemos')
-                else:
-                    print('batch con tumor')
+                    # else:
+                    #     print('batch sin tumor pero lo cogemos')
+                # else:
+                #     print('batch con tumor')
                 t6_ = time.time()
                 if torch.cuda.is_available():
                     device = torch.device('cuda')
