@@ -167,17 +167,19 @@ def loss_function(output, target, loss_type = 1):
         print(loss_, flush=True)
         return loss_
     elif loss_type == 2:
+        print(output.shape, flush=True)
+        print(target.shape, flush=True)
         intersection = torch.sum(output * target)
         union = torch.sum(output) + torch.sum(target) - intersection
         iou = intersection / (union + 1e-7)  # small constant to avoid division by zero
-        if union ==0:
-            print('Es 0!!!!')
+        if union == 0:
+            # print('Es 0!!!!')
             iou=1
         loss_iou = 1 - iou
         weights = target*20+1
         loss = F.binary_cross_entropy(output, target, reduction='none')
         weighted_loss = loss * weights
-        loss_total = loss_iou + torch.sum(weighted_loss)/6
+        loss_total = 3*loss_iou + torch.sum(weighted_loss)
         return loss_total
     elif loss_type == 3:
         
@@ -276,8 +278,13 @@ def train(model, n_epochs:int =4,
             for batch_idx, (data, target) in enumerate(train_loader):
                 t6 = time.time()
                 if torch.all(target[:,0,:,:] == 0):
-                    # print('\t es 0')
-                    continue
+                    if random.random() > 0.1:
+                        # print('\t es 0')
+                        continue
+                    else:
+                        print('batch sin tumor pero lo cogemos')
+                else:
+                    print('batch con tumor')
                 t6_ = time.time()
                 if torch.cuda.is_available():
                     device = torch.device('cuda')
