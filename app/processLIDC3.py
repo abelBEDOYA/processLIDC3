@@ -191,7 +191,9 @@ class Patient():
             images, mask = images[slices[0]:slices[-1]+1,:,:].to(device), mask[slices[0]:slices[-1],:,:].to(device)
             pred = model(images)
         else:
-            pred = model(images[slices[0]:slices[-1]+1,:,:])
+            device = torch.device('cpu')
+            images, mask = images[slices[0]:slices[-1]+1,:,:].to(device), mask[slices[0]:slices[-1],:,:].to(device)
+            pred = model(images)
         if gpu:
             pred = pred.cpu().detach().numpy()
         else:
@@ -222,13 +224,11 @@ class Patient():
             print(pred.shape)
         legend_labels_label = ['Etiqueta']
         fig, axs = plt.subplots(1, num_images, figsize=(12, 4))
-
         for i in range(num_images):
             imagen = images[i][0,:,:]  # Función para obtener la imagen según el índice
             
             axs[i].imshow(imagen, cmap='gray')
             axs[i].set_title(f'Imagen {slices[i]}')
-            
             # Dibujar contorno
             axs[i].contour(mask[i][0], colors='blue', levels=[0.5])  # Ajusta el nivel de contorno según tus necesidades
             # print(pred[i][0].shape)
@@ -237,7 +237,7 @@ class Patient():
         
         plt.show()
 
-    def get_tensors(self, scaled = False):
+    def get_tensors(self, scaled = True):
         if scaled is False:
             vol = np.transpose(self.vol, [2, 0, 1]).astype(
             np.float32)  # each row will be a slice
