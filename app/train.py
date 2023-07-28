@@ -221,7 +221,7 @@ def loss_function(output, target, loss_type = 1):
 
 
 def save_patients_train_val_csv(train_list, val_list, folder_path):
-    nombre_archivo_csv = f"{folder_path}informacion.csv"
+    nombre_archivo_csv = f"{folder_path}pacientes_train_val.csv"
 
     # Combinar las dos listas en una lista de tuplas (cada tupla representa una fila en el CSV)
     filas = list(zip(train_list, val_list))
