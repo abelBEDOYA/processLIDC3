@@ -10,7 +10,7 @@ import random
 import argparse
 import os
 from datetime import datetime
-
+import time
 
 def get_confusion_matrix(id_patient, model, threshold = 0.5, batch = 10):
     cm = np.zeros((2,2))
