@@ -25,7 +25,7 @@ class Patient():
         for ann_clust in self.scan.cluster_annotations():
             # print('hola')
             nod_count +=1
-            cmask, cbbox, _ = consensus(ann_clust, clevel=0.5,
+            cmask, cbbox, _ = consensus(ann_clust, clevel=0.1,
                                         pad=[(20, 20), (20, 20), (0, 0)])
             mask[cbbox] += cmask
         if print_count is True:
@@ -230,7 +230,8 @@ class Patient():
             axs[i].imshow(imagen, cmap='gray')
             axs[i].set_title(f'Imagen {slices[i]}')
             # Dibujar contorno
-            axs[i].contour(mask[i][0], colors='blue', levels=[0.5])  # Ajusta el nivel de contorno según tus necesidades
+            if label:
+                axs[i].contour(mask[i][0], colors='blue', levels=[0.5])  # Ajusta el nivel de contorno según tus necesidades
             # print(pred[i][0].shape)
             if model is not None and np.any(pred[i,0]>threshold):
                 axs[i].contour(pred[i,0], colors='red', levels=[threshold])  # Ajusta el nivel de contorno según tus necesidades
