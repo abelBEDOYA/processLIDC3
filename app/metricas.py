@@ -29,7 +29,7 @@ def get_confusion_matrix(id_patient, model, threshold = 0.5, batch = 10):
     mask_label = mask[0]
     for i in tqdm(range(1,n_slices)):
         if np.all(mask[i] == 0):
-            print('batch_saltado')
+            # print('batch_saltado')
             continue
 
         # print(i+batch, n_slices)
@@ -39,7 +39,7 @@ def get_confusion_matrix(id_patient, model, threshold = 0.5, batch = 10):
         prediccion = np.concatenate((prediccion, pred_bin), axis=0)
         # print(f'{i}', prediccion.shape)
         mask_label = np.concatenate((mask_label, mask[i]), axis=0)
-        print(mask_label.shape, prediccion.shape)
+        # print(mask_label.shape, prediccion.shape)
 
     # label = mask[slices[0]: slices[-1]+1].flatten()
     label = mask_label.flatten()
