@@ -17,7 +17,7 @@ def get_confusion_matrix(id_patient, model, threshold = 0.5, batch = 10):
     batch = int(batch)
     patient = Patient(id_patient)
     patient.scale()
-    images, mask = patient.get_tensors(scaled = False)
+    images, mask = patient.get_tensors(scaled = True)
     mask = mask.cpu().detach().numpy()
     n_slices = mask.shape[0]
     slices = (0, batch-1)
@@ -57,6 +57,7 @@ def get_confusion_matrix_list(id_patient, model, threshold = 0.5, batch = 10):
         cm = get_confusion_matrix(id_patient[0], model, threshold =threshold, batch = batch)
         for id in tqdm(id_patient[1:]):
             cm = cm + get_confusion_matrix(id, model, threshold =threshold, batch = batch)
+            print(cm)
         return cm
 
 def plotNsave(cm, save = None, show = True):
