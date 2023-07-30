@@ -25,9 +25,12 @@ def get_confusion_matrix(id_patient, model, threshold = 0.5, batch = 10):
     prediccion = np.where(prediccion >= threshold, 1, 0)[:,0,:,:]
     masks_slices = mask[0:batch-1,0]
     for i in tqdm(range(batch, n_slices, batch)):
-        if np.all(mask[i,0] == 0):
-            print('batch_saltado')
-            continue
+        try:
+            if np.all(mask[i:i+batch-1,0] == 0):
+                print('batch_saltado')
+                continue
+        except:
+            pass
         slices = (i, i+batch-1)
         # print(i+batch, n_slices)
         pred = patient.predict(model, slices=slices, scaled=True, gpu = True)
