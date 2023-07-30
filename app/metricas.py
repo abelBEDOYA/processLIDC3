@@ -20,35 +20,31 @@ def get_confusion_matrix(id_patient, model, threshold = 0.5, batch = 10):
     images, mask = patient.get_tensors(scaled = True)
     mask = mask.cpu().detach().numpy()[:,0,:,:]
     n_slices = mask.shape[0]
-    slices = (0, batch-1)
-    prediccion = patient.predict(model, slices=slices, scaled=True, gpu = True)
-    prediccion = np.where(prediccion >= threshold, 1, 0)[:,0,:,:]
-    masks_slices = mask[0:batch-1]
-    print(masks_slices.shape)
-    for i in tqdm(range(batch, n_slices, batch)):
-        if i+batch-1 > n_slices:
-            appendar = mask[i:]
-        else:
-            appendar = mask[i:i+batch-1]
-        if np.all(mask[i:i+batch-1] == 0):
+    # slices = (0, batch-1)
+    # prediccion = patient.predict(model, slices=slices, scaled=True, gpu = True)
+    # prediccion = np.where(prediccion >= threshold, 1, 0)[:,0,:,:]
+    # masks_slices = mask[0:batch-1]
+    # print(masks_slices.shape)
+    prediccion = np.array([])
+    mask_label = np.array([])
+    for i in tqdm(n_slices):
+        if np.all(mask[i] == 0):
             print('batch_saltado')
             continue
-        print(appendar.shape)
-        slices = (i, i+batch-1)
+
         # print(i+batch, n_slices)
-        pred = patient.predict(model, slices=slices, scaled=True, gpu = True)
+        pred = patient.predict(model, slices=(i,), scaled=True, gpu = True)
         # print(pred.shape)
         pred_bin = np.where(pred >= threshold, 1, 0)[:,0,:,:]
         prediccion = np.concatenate((prediccion, pred_bin), axis=0)
         # print(f'{i}', prediccion.shape)
-        masks_slices = np.concatenate((masks_slices, appendar), axis=0)
-        print(masks_slices.shape, prediccion.shape)
+        mask_label = np.concatenate((mask_label, mask[i]), axis=0)
+        print(mask_label.shape, prediccion.shape)
 
     # label = mask[slices[0]: slices[-1]+1].flatten()
-    label = masks_slices.flatten()
-
-    
+    label = mask_label.flatten()
     prediccion = prediccion.flatten()
+    
     print(label.shape, prediccion.shape)
     cm_ = confusion_matrix(label, prediccion, labels=(0,1))
     cm = cm + np.array(cm_)
