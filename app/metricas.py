@@ -18,7 +18,7 @@ def get_confusion_matrix(id_patient, model, threshold = 0.5, batch = 10):
     patient = Patient(id_patient)
     patient.scale()
     images, mask = patient.get_tensors(scaled = True)
-    mask = mask.cpu().detach().numpy()
+    mask = mask.cpu().detach().numpy()[:,0,:,:]
     n_slices = mask.shape[0]
     slices = (0, batch-1)
     prediccion = patient.predict(model, slices=slices, scaled=True, gpu = True)
