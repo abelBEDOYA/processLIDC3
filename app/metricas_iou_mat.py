@@ -21,8 +21,13 @@ def calculate_iou(contour_a, contour_b):
     interseccion = np.count_nonzero(mascara_c > 0)
     area_a = np.count_nonzero(mascara_a > 0)
     area_b = np.count_nonzero(mascara_b > 0)
-
-    iou = interseccion / (area_a + area_b - interseccion)
+    union = area_a + area_b - interseccion
+    if  union == 0:
+        if interseccion != 0:
+            print('no deberias ver este mensaje: union=0 pero interseccion!=0 ¿?¿?¿?')
+        iou = 1
+    else:
+        iou = interseccion / union
     # print(f'area_a: {area_a}, area_b: {area_b}, interseccion, {interseccion}')
     # print('iou', iou)
     # fig, axs = plt.subplots(1, 3, figsize=(12, 4))
@@ -188,7 +193,7 @@ if __name__ == "__main__":
     parser.add_argument('--path2dataset', type=str, default='../../manifest-1675801116903/LIDC-IDRI/')
     parser.add_argument('--valsplit', type=float, default=0.1)
     parser.add_argument('--threshold', type=float, default=0.5)
-    parser.add_argument('--batch', type=float, default=5)
+    # parser.add_argument('--batch', type=float, default=5)
     args = parser.parse_args()
     
     print('Buscando los pacientes...', flush= True)
