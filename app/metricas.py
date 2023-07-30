@@ -26,14 +26,14 @@ def get_confusion_matrix(id_patient, model, threshold = 0.5, batch = 10):
     masks_slices = mask[0:batch-1]
     print(masks_slices.shape)
     for i in tqdm(range(batch, n_slices, batch)):
-        try:
-            if np.all(mask[i:i+batch-1] == 0):
-                print('batch_saltado')
-                continue
-            appendar = mask[i:i+batch-1]
-        except:
+        if i+batch-1 > n_slices:
             appendar = mask[i:]
-
+        else:
+            appendar = mask[i:i+batch-1]
+        if np.all(mask[i:i+batch-1] == 0):
+            print('batch_saltado')
+            continue
+        print(appendar.shape)
         slices = (i, i+batch-1)
         # print(i+batch, n_slices)
         pred = patient.predict(model, slices=slices, scaled=True, gpu = True)
