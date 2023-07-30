@@ -27,7 +27,7 @@ def get_confusion_matrix(id_patient, model, threshold = 0.5, batch = 10):
     # print(masks_slices.shape)
     prediccion = np.array([])
     mask_label = np.array([])
-    for i in tqdm(n_slices):
+    for i in tqdm(range(n_slices)):
         if np.all(mask[i] == 0):
             print('batch_saltado')
             continue
