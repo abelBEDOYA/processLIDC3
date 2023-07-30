@@ -146,7 +146,7 @@ def get_confusion_matrix2(patient_list, threshold=0.4):
 
         for i in range(n_slices):
             
-            if np.all(mask[i] == 0):
+            if np.all(mask[i,0] == 0):
                 continue
             print(f'{patient_id}  slices {i}/{n_slices} Hay tumor.')
             prediccion = patient.predict(model, slices=(i,), scaled=True, gpu = True)
