@@ -22,7 +22,7 @@ def get_confusion_matrix(id_patient, model, threshold = 0.5, batch = 10):
     n_slices = mask.shape[0]
     # slices = (0, batch-1)
     prediccion = patient.predict(model, slices=(0,), scaled=True, gpu = True)
-    # prediccion = np.where(prediccion >= threshold, 1, 0)[:,0,:,:]
+    prediccion = np.where(prediccion >= threshold, 1, 0)[0,0,:,:]
     # masks_slices = mask[0:batch-1]
     # print(masks_slices.shape)
     # prediccion = np.array([])
@@ -35,7 +35,7 @@ def get_confusion_matrix(id_patient, model, threshold = 0.5, batch = 10):
         # print(i+batch, n_slices)
         pred = patient.predict(model, slices=(i,), scaled=True, gpu = True)
         # print(pred.shape)
-        pred_bin = np.where(pred >= threshold, 1, 0)[:,0,:,:]
+        pred_bin = np.where(pred >= threshold, 1, 0)[0,0,:,:]
         prediccion = np.concatenate((prediccion, pred_bin), axis=0)
         # print(f'{i}', prediccion.shape)
         mask_label = np.concatenate((mask_label, mask[i]), axis=0)
