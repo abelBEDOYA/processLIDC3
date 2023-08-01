@@ -116,6 +116,8 @@ def calculate_confusion_matrix(mask_a, mask_b, iou_threshold=0.3):
         'FN': false_negative
     }
     # print(confusion_matrix)
+    if true_positive+false_negative != len(contours_b):
+        print('WARNING: true_positive+false_negative != len(contours_b)',true_positive, false_negative, len(contours_b))
     return confusion_matrix
 
 
