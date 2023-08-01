@@ -15,8 +15,8 @@ from datetime import datetime
 def calculate_iou(contour_a, contour_b):
 
     # Rellena el contorno con un valor blanco (255) en la imagen en blanco
-    mascara_a = cv2.drawContours(np.zeros((256,256)), [contour_a], -1, (255), thickness=cv2.FILLED)
-    mascara_b = cv2.drawContours(np.zeros((256,256)), [contour_b], -1, (255), thickness=cv2.FILLED)
+    mascara_a = cv2.drawContours(np.zeros((512,512)), [contour_a], -1, (255), thickness=cv2.FILLED)
+    mascara_b = cv2.drawContours(np.zeros((512,512)), [contour_b], -1, (255), thickness=cv2.FILLED)
     mascara_c = mascara_a*mascara_b
     interseccion = np.count_nonzero(mascara_c > 0)
     area_a = np.count_nonzero(mascara_a > 0)
@@ -25,7 +25,7 @@ def calculate_iou(contour_a, contour_b):
     if  union == 0:
         if interseccion != 0:
             print('no deberias ver este mensaje: union=0 pero interseccion!=0 ¿?¿?¿?')
-        iou = 1
+        iou = 999999999999
     else:
         iou = interseccion / union
     # print(f'area_a: {area_a}, area_b: {area_b}, interseccion, {interseccion}')
