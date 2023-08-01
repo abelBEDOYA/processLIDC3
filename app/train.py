@@ -19,6 +19,31 @@ import csv
 random.seed(123)
 
 
+
+def dice_coeff(input, target, reduce_batch_first: bool = False, epsilon: float = 1e-6):
+    # Average of Dice coefficient for all batches, or for a single mask
+    assert input.size() == target.size()
+    assert input.dim() == 3 or not reduce_batch_first
+
+    sum_dim = (-1, -2) if input.dim() == 2 or not reduce_batch_first else (-1, -2, -3)
+
+    inter = 2 * (input * target).sum(dim=sum_dim)
+    sets_sum = input.sum(dim=sum_dim) + target.sum(dim=sum_dim)
+    sets_sum = torch.where(sets_sum == 0, inter, sets_sum)
+
+    dice = (inter + epsilon) / (sets_sum + epsilon)
+    return dice.mean()
+
+def multiclass_dice_coeff(input, target, reduce_batch_first: bool = False, epsilon: float = 1e-6):
+    # Average of Dice coefficient for all classes
+    return dice_coeff(input.flatten(0, 1), target.flatten(0, 1), reduce_batch_first, epsilon)
+
+
+def dice_loss(input, target, multiclass: bool = False):
+    # Dice loss (objective to minimize) between 0 and 1
+    fn = multiclass_dice_coeff if multiclass else dice_coeff
+    return 1 - fn(input, target, reduce_batch_first=True)
+
 def train_val_split(patients_list, val_split):
     """TOma la lsita de pacientes list(str) y hace la separacion
     en train y validation segun la proporcion indicada en val_split.
@@ -187,7 +212,7 @@ def loss_function(output, target, loss_type = 1):
         weights = target_nodulo*20+1
         loss = F.binary_cross_entropy(output_nodulo, target_nodulo, reduction='none')
         weighted_loss = loss * weights
-        loss_total_0 = 3*loss_iou + torch.sum(weighted_loss)
+        loss_total_0 = 10*loss_iou + torch.sum(weighted_loss)
         
         # Loss de mascara sana:
         ## Solo BCE
@@ -196,7 +221,7 @@ def loss_function(output, target, loss_type = 1):
         weights = (-1*target_nodulo+1)*20+1
         loss = F.binary_cross_entropy(output_sana, target_sana, reduction='none')
         weighted_loss = loss * weights
-        loss_total_1 = 3*loss_iou + torch.sum(weighted_loss)
+        loss_total_1 = 10*loss_iou + torch.sum(weighted_loss)
         
         
         loss_total = loss_total_0 + loss_total_1
@@ -216,6 +241,9 @@ def loss_function(output, target, loss_type = 1):
         loss = F.binary_cross_entropy(output, target, reduction='none')
         weighted_loss = loss * weights
         return torch.sum(weighted_loss)
+    elif loss_type == 5:
+        dice_mean_loss = multiclass_dice_coeff(output, target)
+        return dice_mean_loss
     else:
         print('Indica una loss function que sea 1, 2 o 3. Has indicado loss = {}'.format(loss_type))
 
@@ -311,7 +339,7 @@ def train(model, n_epochs:int =4,
             for batch_idx, (data, target) in enumerate(train_loader):
                 t6 = time.time()
                 if torch.all(target[:,0,:,:] == 0):
-                    if random.random() > 0.05:
+                    if random.random() > 0.10:
                         # print('\t es 0')
                         continue
                     # else:
