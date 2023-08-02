@@ -132,9 +132,9 @@ def plot(data, show=False, path_save=None, name_plot='loss_plot', loss_type=1):
         plt.ylabel('loss')
     else:
         #plt.plot(np.linspace(1, n_epochs, np.array(batch_loss_history).shape[0]), np.log(np.array(batch_loss_history)), label='Train Batch Loss')
-        plt.plot(np.linspace(1, n_epochs, np.array(patient_loss_history).shape[0]), np.log(np.array(patient_loss_history)), '.', alpha=0.2,label='Train Patient Loss')
-        plt.plot(np.linspace(1, n_epochs, n_epochs), np.log(np.array(epoch_loss_history)), label='Train Epoch Loss')
-        plt.plot(np.linspace(1, n_epochs, n_epochs), np.log(np.array(epoch_val_loss_history)), label='Val. Epoch Loss')
+        plt.plot(np.linspace(1, n_epochs, np.array(patient_loss_history).shape[0]), np.array(patient_loss_history), '.', alpha=0.2,label='Train Patient Loss')
+        plt.plot(np.linspace(1, n_epochs, n_epochs), np.array(epoch_loss_history), label='Train Epoch Loss')
+        plt.plot(np.linspace(1, n_epochs, n_epochs), np.array(epoch_val_loss_history), label='Val. Epoch Loss')
         plt.yscale("log")
         plt.ylabel('log(loss)')
     plt.title(f'Loss: Type {loss_type}')
@@ -212,7 +212,7 @@ def loss_function(output, target, loss_type = 1):
         weights = target_nodulo*20+1
         loss = F.binary_cross_entropy(output_nodulo, target_nodulo, reduction='none')
         weighted_loss = loss * weights
-        loss_total_0 = 10*loss_iou + torch.sum(weighted_loss)
+        loss_total_0 = 4000*loss_iou + torch.sum(weighted_loss)
         
         # Loss de mascara sana:
         ## Solo BCE
@@ -221,7 +221,7 @@ def loss_function(output, target, loss_type = 1):
         weights = (-1*target_nodulo+1)*20+1
         loss = F.binary_cross_entropy(output_sana, target_sana, reduction='none')
         weighted_loss = loss * weights
-        loss_total_1 = 10*loss_iou + torch.sum(weighted_loss)
+        loss_total_1 = 1000*loss_iou + torch.sum(weighted_loss)
         
         
         loss_total = loss_total_0 + loss_total_1
