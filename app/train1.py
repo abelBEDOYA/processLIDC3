@@ -190,7 +190,7 @@ def loss_function(output, target, loss_type = 1):
         weights = target_nodulo*20+1
         loss = F.binary_cross_entropy(output_nodulo, target_nodulo, reduction='none')
         weighted_loss = loss * weights
-        iou_loss1 = 400*loss_iou
+        iou_loss1 = 4000*loss_iou
         wbce_loss1 = torch.sum(weighted_loss)
         loss_total_0 = iou_loss1 + wbce_loss1
         
@@ -201,7 +201,7 @@ def loss_function(output, target, loss_type = 1):
         weights = (-1*target_nodulo+1)*20+1
         loss = F.binary_cross_entropy(output_sana, target_sana, reduction='none')
         weighted_loss = loss * weights
-        loss_total_1 = 100*loss_iou + torch.sum(weighted_loss)
+        loss_total_1 = 1000*loss_iou + torch.sum(weighted_loss)
         
         
         loss_total = loss_total_0 + loss_total_1
