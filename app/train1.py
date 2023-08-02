@@ -19,31 +19,6 @@ import csv
 random.seed(123)
 
 
-
-def dice_coeff(input, target, reduce_batch_first: bool = False, epsilon: float = 1e-6):
-    # Average of Dice coefficient for all batches, or for a single mask
-    assert input.size() == target.size()
-    assert input.dim() == 3 or not reduce_batch_first
-
-    sum_dim = (-1, -2) if input.dim() == 2 or not reduce_batch_first else (-1, -2, -3)
-
-    inter = 2 * (input * target).sum(dim=sum_dim)
-    sets_sum = input.sum(dim=sum_dim) + target.sum(dim=sum_dim)
-    sets_sum = torch.where(sets_sum == 0, inter, sets_sum)
-
-    dice = (inter + epsilon) / (sets_sum + epsilon)
-    return dice.mean()
-
-def multiclass_dice_coeff(input, target, reduce_batch_first: bool = False, epsilon: float = 1e-6):
-    # Average of Dice coefficient for all classes
-    return dice_coeff(input.flatten(0, 1), target.flatten(0, 1), reduce_batch_first, epsilon)
-
-
-def dice_loss(input, target, multiclass: bool = False):
-    # Dice loss (objective to minimize) between 0 and 1
-    fn = multiclass_dice_coeff if multiclass else dice_coeff
-    return 1 - fn(input, target, reduce_batch_first=True)
-
 def train_val_split(patients_list, val_split):
     """TOma la lsita de pacientes list(str) y hace la separacion
     en train y validation segun la proporcion indicada en val_split.
@@ -194,7 +169,6 @@ def loss_function(output, target, loss_type = 1):
         # Definir función de pérdida
         loss_fn = nn.BCELoss(reduction='none')
         loss_ = loss_fn(output, target)
-        print(loss_, flush=True)
         return loss_
     elif loss_type == 2:
         # print(output.shape, flush=True)
@@ -216,7 +190,7 @@ def loss_function(output, target, loss_type = 1):
         weights = target_nodulo*20+1
         loss = F.binary_cross_entropy(output_nodulo, target_nodulo, reduction='none')
         weighted_loss = loss * weights
-        iou_loss1 = 10*loss_iou
+        iou_loss1 = 400*loss_iou
         wbce_loss1 = torch.sum(weighted_loss)
         loss_total_0 = iou_loss1 + wbce_loss1
         
@@ -227,7 +201,7 @@ def loss_function(output, target, loss_type = 1):
         weights = (-1*target_nodulo+1)*20+1
         loss = F.binary_cross_entropy(output_sana, target_sana, reduction='none')
         weighted_loss = loss * weights
-        loss_total_1 = 10*loss_iou + torch.sum(weighted_loss)
+        loss_total_1 = 100*loss_iou + torch.sum(weighted_loss)
         
         
         loss_total = loss_total_0 + loss_total_1
@@ -247,12 +221,8 @@ def loss_function(output, target, loss_type = 1):
         loss = F.binary_cross_entropy(output, target, reduction='none')
         weighted_loss = loss * weights
         return torch.sum(weighted_loss)
-    elif loss_type == 5:
-        dice_mean_loss = multiclass_dice_coeff(output, target)
-        return dice_mean_loss
     else:
         print('Indica una loss function que sea 1, 2 o 3. Has indicado loss = {}'.format(loss_type))
-
 
 def save_patients_train_val_csv(train_list, val_list, folder_path):
     nombre_archivo_csv = f"{folder_path}pacientes_train_val.csv"
@@ -387,6 +357,11 @@ def train(model, n_epochs:int =4,
                     print('Back propagation: ',t10-t9, 's')
                     print('el batch tarda: ', t10-t6)
                     print('-----------')
+            print('Realizacion media iou...')
+            print(np.mean(iou_epoch))
+            print('---------')
+            print('realizadon media de wbce: ')
+            print(np.mean(wbce_epoch))
             iou_history = np.append(iou_history, np.mean(iou_epoch))
             wbce_history = np.append(wbce_history, np.mean(wbce_epoch))
             del data
@@ -417,9 +392,9 @@ def train(model, n_epochs:int =4,
                         'epoch_loss_history': epoch_loss_history,
                         'batch_loss_history': batch_loss_history,
                         'patient_loss_history': patient_loss_history,
-                        'epoch_val_loss_history': epoch_val_loss_history
-                        'iou_train': iou_history,
-                        'wbce_train': wbce_history
+                        'epoch_val_loss_history': epoch_val_loss_history,
+                        'iou_history': iou_history,
+                        'wbce_history': wbce_history
                         }
                     plot(data_dict, show=plot_metrics, path_save=path2savefiles, name_plot= 'loss_epoch_{}'.format(epoch+1), loss_type=loss_type)
 
@@ -431,7 +406,9 @@ def train(model, n_epochs:int =4,
                 'epoch_loss_history': epoch_loss_history,
                 'batch_loss_history': batch_loss_history,
                 'patient_loss_history': patient_loss_history,
-                'epoch_val_loss_history': epoch_val_loss_history
+                'epoch_val_loss_history': epoch_val_loss_history,
+                'iou_history': iou_history,
+                'wbce_history': wbce_history
                 }
     save_model(model, path2savefiles, model_name='finalmodel', extension=model_extension)
     if save_plots:
@@ -509,8 +486,15 @@ if __name__=='__main__':
     # # Cargar los pesos del modelo entrenado en el modelo aleatorio
     model.load_state_dict(model_entrenado.state_dict())
     if torch.cuda.is_available():
-        device = torch.device('cuda')
-        model = model.to(device)
+        print('moviendo a la grafica...')
+        try:
+            device = torch.device('cuda')
+            model = model.to(device)
+            print('INFO: Modelo funcionando en la GPU')
+        except:
+            print('WARNING: Hay fallo al trasladar a la grafica, el enrteno ira muy lento.'\
+                  'Soluciones: \n 1. Reinicia el ordenador \n 2. Prueba NVIDIA-SMI')
+    
     
     # Llamar a la función train con los argumentos
     train(model, n_epochs=args.n_epochs, batch_size=args.batch_size, val_split=args.val_split,
@@ -521,3 +505,4 @@ if __name__=='__main__':
         
         
         
+
