@@ -263,6 +263,7 @@ def train(model, n_epochs:int =4,
     patients = [pat for pat in patients if not pat=='LICENSE' and pat not in failed_patients]
 
     train_patients, val_patients = train_val_split(patients, val_split)
+    train_patients, val_patients = ['LIDC-IDRI-0001'], ['LIDC-IDRI-0002']
     save_patients_train_val_csv(train_patients, val_patients, path2savefiles)
     # Definir optimizador
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
@@ -362,8 +363,7 @@ def train(model, n_epochs:int =4,
             print('---------')
             print('realizadon media de wbce: ')
             print(np.mean(wbce_epoch))
-            iou_history = np.append(iou_history, np.mean(iou_epoch))
-            wbce_history = np.append(wbce_history, np.mean(wbce_epoch))
+            
             del data
             del target
             del dataset
@@ -376,7 +376,8 @@ def train(model, n_epochs:int =4,
             patient_loss_history = np.append(patient_loss_history, loss_patient)
             tiempo_paciente = time.time()-inicio
             tiempos_paciente.append(tiempo_paciente)
-            
+        iou_history = np.append(iou_history, np.mean(iou_epoch))
+        wbce_history = np.append(wbce_history, np.mean(wbce_epoch))
         epoch_loss_history = np.append(epoch_loss_history, np.mean(np.array(loss_patient)))
         print('Fin epoca {}: {}'.format(epoch+1, get_tiempo()))
 
