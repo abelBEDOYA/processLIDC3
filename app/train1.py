@@ -263,7 +263,6 @@ def train(model, n_epochs:int =4,
     patients = [pat for pat in patients if not pat=='LICENSE' and pat not in failed_patients]
 
     train_patients, val_patients = train_val_split(patients, val_split)
-    train_patients, val_patients = ['LIDC-IDRI-0001'], ['LIDC-IDRI-0002']
     save_patients_train_val_csv(train_patients, val_patients, path2savefiles)
     # Definir optimizador
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
