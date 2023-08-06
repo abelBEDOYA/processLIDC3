@@ -515,7 +515,8 @@ if __name__=='__main__':
     # model = UNet(in_channels=1, 
     #                  out_channels=1, 
     #                  init_features=32) # , dropout_rate=0.2)
-    model_entrenado = torch.hub.load('milesial/Pytorch-UNet', 'unet_carvana', pretrained=True, scale=0.5)
+    # model_entrenado = torch.hub.load('milesial/Pytorch-UNet', 'unet_carvana', pretrained=True, scale=0.5)
+    model_entrenado = torch.jit.load('/home/abel/github/processLIDC3/trainings/train_4_loss_2_batch4_15aleatorio/model-epoch10.pt')
     model = UNet(n_channels=3, n_classes=2)  # , init_features=32) # , dropout_rate=0.2)
     # # Cargar los pesos del modelo entrenado en el modelo aleatorio
     model.load_state_dict(model_entrenado.state_dict())
