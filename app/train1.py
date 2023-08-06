@@ -201,7 +201,16 @@ def loss_function(output, target, loss_type = 1):
         weights = (-1*target_nodulo+1)*20+1
         loss = F.binary_cross_entropy(output_sana, target_sana, reduction='none')
         weighted_loss = loss * weights
-        loss_total_1 = 1000*loss_iou + torch.sum(weighted_loss)
+        
+        output_sana_ = -1*output_sana+1
+        target_sana_ = -1*target_sana+1
+        intersection = torch.sum(output_sana_ * target_sana_)
+        union = torch.sum(output_sana_) + torch.sum(target_sana_) - intersection
+        iou = intersection / (union + 1e-7)  # small constant to avoid division by zero
+        if union == 0:
+            iou=1
+        loss_iou = 1 - iou
+        loss_total_1 = 2000*loss_iou + torch.sum(weighted_loss)
         
         
         loss_total = loss_total_0 + loss_total_1
@@ -210,12 +219,37 @@ def loss_function(output, target, loss_type = 1):
         return loss_total, iou_loss1, wbce_loss1
     elif loss_type == 3:
         
-        intersection = torch.sum(output * target)
-        union = torch.sum(output) + torch.sum(target) - intersection
+        # Loss de mascara nodulos:
+        output_nodulo = output[:,0,:,:]
+        target_nodulo = target[:,0,:,:]
+        ## IoU
+        intersection = torch.sum(output_nodulo * target_nodulo)
+        union = torch.sum(output_nodulo) + torch.sum(target_nodulo) - intersection
         iou = intersection / (union + 1e-7)  # small constant to avoid division by zero
-        loss_iou = 1 - iou
-        # print(loss_iou)
-        return loss_iou
+        if union == 0:
+            iou=1
+        loss_iou1 = 1 - iou
+        
+        ## sano:
+        output_sana = output[:,1,:,:]
+        target_sana = target[:,1,:,:]
+
+        weights = (-1*target_nodulo+1)*20+1
+    
+        output_sana_ = -1*output_sana+1
+        target_sana_ = -1*target_sana+1
+        intersection = torch.sum(output_sana_ * target_sana_)
+        union = torch.sum(output_sana_) + torch.sum(target_sana_) - intersection
+        iou = intersection / (union + 1e-7)  # small constant to avoid division by zero
+        if union == 0:
+            iou=1
+        loss_iou2 = 1 - iou
+        loss_total = 4000*loss_iou1+2000*loss_iou2
+        
+        
+        
+        
+        return loss_total, loss_iou1, loss_iou2
     elif loss_type == 4:
         weights = target*20+1
         loss = F.binary_cross_entropy(output, target, reduction='none')
