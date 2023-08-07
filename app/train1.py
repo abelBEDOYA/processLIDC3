@@ -184,7 +184,7 @@ def loss_function(output, target, loss_type = 1):
         union = torch.sum(output_nodulo) + torch.sum(target_nodulo) - intersection
         iou = intersection / (union + 1e-7)  # small constant to avoid division by zero
         if union == 0:
-            iou=1
+            iou=torch.tensor(1)
         loss_iou = 1 - iou
         ## BCE
         weights = target_nodulo*20+1
@@ -208,7 +208,7 @@ def loss_function(output, target, loss_type = 1):
         union = torch.sum(output_sana_) + torch.sum(target_sana_) - intersection
         iou = intersection / (union + 1e-7)  # small constant to avoid division by zero
         if union == 0:
-            iou=1
+            iou=torch.tensor(1)
         loss_iou = 1 - iou
         loss_total_1 = 2000*loss_iou + torch.sum(weighted_loss)
         
@@ -227,7 +227,7 @@ def loss_function(output, target, loss_type = 1):
         union = torch.sum(output_nodulo) + torch.sum(target_nodulo) - intersection
         iou = intersection / (union + 1e-7)  # small constant to avoid division by zero
         if union == 0:
-            iou=1
+            iou=torch.tensor(1)
         loss_iou1 = 1 - iou
         
         ## sano:
@@ -242,7 +242,7 @@ def loss_function(output, target, loss_type = 1):
         union = torch.sum(output_sana_) + torch.sum(target_sana_) - intersection
         iou = intersection / (union + 1e-7)  # small constant to avoid division by zero
         if union == 0:
-            iou=1
+            iou=torch.tensor(1)
         loss_iou2 = 1 - iou
         loss_total = 4000*loss_iou1+2000*loss_iou2
         
