@@ -284,26 +284,42 @@ class Patient():
             
             print(images.shape)
             if channels_z:
+                # start = time.time()
+                # images_new = self.optimize_process(images)
+                start1 = time.time()
+                # print('funcion', start1-start)
                 images_new = torch.empty((shape[0], 3, 512, 512), dtype=images.dtype)
-                print(shape[0])
+                # print(shape[0])
                 for i in range(shape[0]):
                     if i == 0:
                         images_new[i, 0, :, :] = images[i, :, :]
                     else:
-                        print('estoy aqui')
+                        # print('estoy aqui')
                         images_new[i, 0, :, :] = images[i - 1, :, :]
-                    print('cuidao', i)
+                    # print('cuidao', i)
                     images_new[i, 1, :, :] = images[i, :, :]
                     if i == shape[0]-1:
-                        print('estoy dentro')
+                        # print('estoy dentro')
                         images_new[i, 2, :, :] = images[i, :, :]
                     else:
                         images_new[i, 2, :, :] = images[i + 1, :, :]
+                # print('a mano', time.time()-start1)
                 return images_new, transformed_masks
             else:
                 images = images.reshape(shape[0], 1, shape[1], shape[2])
                 images = images.repeat((1,3,1, 1))
                 return images, transformed_masks
+    def optimize_process(self, images):
+        shape = images.shape
+    
+        images_new = torch.empty((images.shape[0], 3, 512, 512), dtype=images.dtype)
+        images_new[:, 0, :, :] = torch.roll(images[:, :, :], shifts=1, dims=0)
+        images_new[:, 1, :, :] = images[:, :, :]
+        images_new[:, 2, :, :] = torch.roll(images[:, :, :], shifts=-1, dims=0)
+        images_new[0,0,:,:] = images[0, :, :]
+        images_new[-1,2,:,:] = images[-1, :, :]
+        
+        return images_new
             
             
             
