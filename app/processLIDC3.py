@@ -238,7 +238,7 @@ class Patient():
         
         plt.show()
 
-    def get_tensors(self, scaled = True):
+    def get_tensors(self, scaled = True, channels_z = True):
         if scaled is False:
             vol = np.transpose(self.vol, [2, 0, 1]).astype(
             np.float32)  # each row will be a slice
@@ -264,13 +264,12 @@ class Patient():
             t_vol = torch.from_numpy(vol)
             t_mask = torch.from_numpy(mask)
 
+            
             # avg = torch.nn.AvgPool2d(2)
             images = t_vol
             masks = t_mask
             shape = images.shape
-            images = images.view(shape[0], 1, shape[1], shape[2])
-            images = images.repeat((1,3,1, 1))
-
+            
             # Crear un nuevo tensor de shape [261, 1, 2, 512, 512] con todos los valores en cero
             transformed_masks = torch.zeros(masks.shape[0], 2, 512, 512)
 
@@ -282,7 +281,31 @@ class Patient():
 
             # Asignar los valores complementarios en la segunda parte del eje 2
             transformed_masks[:, 1, :, :] = complement_tensor
-            return images, transformed_masks
+            
+            print(images.shape)
+            if channels_z:
+                images_new = torch.empty((shape[0], 3, 512, 512), dtype=images.dtype)
+                print(shape[0])
+                for i in range(shape[0]):
+                    if i == 0:
+                        images_new[i, 0, :, :] = images[i, :, :]
+                    else:
+                        print('estoy aqui')
+                        images_new[i, 0, :, :] = images[i - 1, :, :]
+                    print('cuidao', i)
+                    images_new[i, 1, :, :] = images[i, :, :]
+                    if i == shape[0]-1:
+                        print('estoy dentro')
+                        images_new[i, 2, :, :] = images[i, :, :]
+                    else:
+                        images_new[i, 2, :, :] = images[i + 1, :, :]
+                return images_new, transformed_masks
+            else:
+                images = images.reshape(shape[0], 1, shape[1], shape[2])
+                images = images.repeat((1,3,1, 1))
+                return images, transformed_masks
+            
+            
             
         
         
