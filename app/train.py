@@ -20,29 +20,13 @@ random.seed(123)
 
 
 
-def dice_coeff(input, target, reduce_batch_first: bool = False, epsilon: float = 1e-6):
-    # Average of Dice coefficient for all batches, or for a single mask
-    assert input.size() == target.size()
-    assert input.dim() == 3 or not reduce_batch_first
+def dice_coefficient(pred, target):
+    smooth = 1e-5
+    intersection = (pred * target).sum()
+    union = pred.sum() + target.sum()
 
-    sum_dim = (-1, -2) if input.dim() == 2 or not reduce_batch_first else (-1, -2, -3)
-
-    inter = 2 * (input * target).sum(dim=sum_dim)
-    sets_sum = input.sum(dim=sum_dim) + target.sum(dim=sum_dim)
-    sets_sum = torch.where(sets_sum == 0, inter, sets_sum)
-
-    dice = (inter + epsilon) / (sets_sum + epsilon)
+    dice = (2 * intersection + smooth) / (union + smooth)
     return dice.mean()
-
-def multiclass_dice_coeff(input, target, reduce_batch_first: bool = False, epsilon: float = 1e-6):
-    # Average of Dice coefficient for all classes
-    return dice_coeff(input.flatten(0, 1), target.flatten(0, 1), reduce_batch_first, epsilon)
-
-
-def dice_loss(input, target, multiclass: bool = False):
-    # Dice loss (objective to minimize) between 0 and 1
-    fn = multiclass_dice_coeff if multiclass else dice_coeff
-    return 1 - fn(input, target, reduce_batch_first=True)
 
 def train_val_split(patients_list, val_split):
     """TOma la lsita de pacientes list(str) y hace la separacion
@@ -99,9 +83,10 @@ def get_val_loss(model, val_patients, batch_size=4, loss_type = 1):
         train_loader = DataLoader(dataset,batch_size=batch_size, shuffle=True)
         loss_batch = np.array([])
         for batch_idx, (data, target) in enumerate(train_loader):
-            if torch.mean(target)==0:
-                # print('es 0')
-                continue
+            if torch.all(target[:,0,:,:] == 0):
+                if random.random() > 0.40:
+                    # print('\t es 0')
+                    continue
             # # Forward pass
             output = model(data)
             # Calcular pérdida
@@ -242,8 +227,14 @@ def loss_function(output, target, loss_type = 1):
         weighted_loss = loss * weights
         return torch.sum(weighted_loss)
     elif loss_type == 5:
-        dice_mean_loss = multiclass_dice_coeff(output, target)
-        return dice_mean_loss
+        output_tumor = output[:,0,:,:]
+        target_tumor = target[:,0,:,:]
+        dice_tumor = dice_coefficient(output_tumor, target_tumor)
+        output_sana = output[:,1,:,:]
+        target_sana = target[:,1,:,:]
+        dice_sana = dice_coefficient(output_sana, target_sana)
+        dice_loss = 2 - 400*dice_tumor - 200*dice_sana
+        return dice_loss
     else:
         print('Indica una loss function que sea 1, 2 o 3. Has indicado loss = {}'.format(loss_type))
 
@@ -339,7 +330,7 @@ def train(model, n_epochs:int =4,
             for batch_idx, (data, target) in enumerate(train_loader):
                 t6 = time.time()
                 if torch.all(target[:,0,:,:] == 0):
-                    if random.random() > 0.10:
+                    if random.random() > 0.40:
                         # print('\t es 0')
                         continue
                     # else:
@@ -490,9 +481,9 @@ if __name__=='__main__':
     #                  out_channels=1, 
     #                  init_features=32) # , dropout_rate=0.2)
     model_entrenado = torch.hub.load('milesial/Pytorch-UNet', 'unet_carvana', pretrained=True, scale=0.5)
-    model = UNet(n_channels=3, n_classes=2)  # , init_features=32) # , dropout_rate=0.2)
+    # model = UNet(n_channels=3, n_classes=2)  # , init_features=32) # , dropout_rate=0.2)
     # # Cargar los pesos del modelo entrenado en el modelo aleatorio
-    model.load_state_dict(model_entrenado.state_dict())
+    # model.load_state_dict(model_entrenado.state_dict())
     if torch.cuda.is_available():
         device = torch.device('cuda')
         model = model.to(device)
