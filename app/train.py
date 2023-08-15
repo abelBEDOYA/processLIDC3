@@ -480,7 +480,7 @@ if __name__=='__main__':
     # model = UNet(in_channels=1, 
     #                  out_channels=1, 
     #                  init_features=32) # , dropout_rate=0.2)
-    model_entrenado = torch.hub.load('milesial/Pytorch-UNet', 'unet_carvana', pretrained=True, scale=0.5)
+    model = torch.hub.load('milesial/Pytorch-UNet', 'unet_carvana', pretrained=True, scale=0.5)
     # model = UNet(n_channels=3, n_classes=2)  # , init_features=32) # , dropout_rate=0.2)
     # # Cargar los pesos del modelo entrenado en el modelo aleatorio
     # model.load_state_dict(model_entrenado.state_dict())
