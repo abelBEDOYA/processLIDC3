@@ -254,8 +254,8 @@ def loss_function(output, target, loss_type = 1):
         weights = target*20+1
         loss = F.binary_cross_entropy(output, target, reduction='none')
         weighted_loss = loss * weights
-        lossss = torch.sum(weighted_loss), 
-        return lossss,lossss,lossss
+        lossss = torch.sum(weighted_loss)
+        return lossss, lossss, lossss
     else:
         print('Indica una loss function que sea 1, 2 o 3. Has indicado loss = {}'.format(loss_type))
 
