@@ -282,7 +282,7 @@ class Patient():
             # Asignar los valores complementarios en la segunda parte del eje 2
             transformed_masks[:, 1, :, :] = complement_tensor
             
-            print(images.shape)
+            # print(images.shape)
             if channels_z:
                 # start = time.time()
                 # images_new = self.optimize_process(images)
