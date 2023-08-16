@@ -300,7 +300,7 @@ def train(model, n_epochs:int =4,
     train_patients, val_patients = train_val_split(patients, val_split)
     save_patients_train_val_csv(train_patients, val_patients, path2savefiles)
     # Definir optimizador
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.00001)
 
 
     loss_batch = np.array([])
