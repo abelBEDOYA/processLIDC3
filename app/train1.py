@@ -190,7 +190,7 @@ def loss_function(output, target, loss_type = 1):
         weights = target_nodulo*20+1
         loss = F.binary_cross_entropy(output_nodulo, target_nodulo, reduction='none')
         weighted_loss = loss * weights
-        iou_loss1 = 4000*loss_iou
+        iou_loss1 = 6000*loss_iou
         wbce_loss1 = torch.sum(weighted_loss)
         loss_total_0 = iou_loss1 + wbce_loss1
         
@@ -210,7 +210,7 @@ def loss_function(output, target, loss_type = 1):
         if union == 0:
             iou=torch.tensor(1)
         loss_iou = 1 - iou
-        loss_total_1 = 2000*loss_iou + torch.sum(weighted_loss)
+        loss_total_1 = 3000*loss_iou + torch.sum(weighted_loss)
         
         
         loss_total = loss_total_0 + loss_total_1
